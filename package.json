@@ -1,0 +1,31 @@
+{
+  "name": "air-theremin",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "A gesture-controlled musical instrument using AI hand tracking and web audio",
+  "author": "Your Name",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/air-theremin"
+  },
+  "keywords": [
+    "theremin",
+    "music",
+    "hand-tracking",
+    "web-audio",
+    "mediapipe",
+    "gesture-control"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mediapipe/hands": "^0.4.1675469240"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  }
+}
