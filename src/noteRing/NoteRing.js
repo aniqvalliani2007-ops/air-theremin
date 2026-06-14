@@ -18,10 +18,27 @@ export class NoteRing {
   calculateZones() {
     const w = this.canvas.width;
     const h = this.canvas.height;
+    const minDim = Math.min(w, h);
+    
     this.center.x = w * RING_CONFIG.centerX;
     this.center.y = h * RING_CONFIG.centerY;
-    this.ringRadius = Math.min(w, h) * RING_CONFIG.radius;
-    const zoneRadiusPx = Math.min(w, h) * RING_CONFIG.zoneRadius;
+    this.ringRadius = minDim * RING_CONFIG.radius;
+    
+    // Responsive zone sizing based on screen size
+    let zoneRadiusRatio = RING_CONFIG.zoneRadius;
+    
+    // Adjust zone size for smaller screens
+    if (minDim < 500) {
+      zoneRadiusRatio = RING_CONFIG.minZoneRadius;
+    } else if (minDim > 1200) {
+      zoneRadiusRatio = RING_CONFIG.maxZoneRadius;
+    } else {
+      // Linear interpolation between min and max
+      const t = (minDim - 500) / (1200 - 500);
+      zoneRadiusRatio = RING_CONFIG.minZoneRadius + t * (RING_CONFIG.maxZoneRadius - RING_CONFIG.minZoneRadius);
+    }
+    
+    const zoneRadiusPx = minDim * zoneRadiusRatio;
     
     this.zones = NOTES.map(note => {
       const angleRad = ((note.angle + RING_CONFIG.rotationOffset) * Math.PI) / 180;

@@ -18,5 +18,8 @@ export const RING_CONFIG = {
   centerY: 0.5,
   radius: 0.32,
   zoneRadius: 0.07,
-  rotationOffset: -90
+  rotationOffset: -90,
+  // Responsive scaling
+  minZoneRadius: 0.05,  // Minimum zone size for small screens
+  maxZoneRadius: 0.09   // Maximum zone size for large screens
 };
