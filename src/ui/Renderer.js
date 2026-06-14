@@ -10,10 +10,12 @@ export class Renderer {
     this.hitDetector = null;
     this.fingertip = null;
     this.targetFingertip = null;
+    this.velocityX = 0;
+    this.velocityY = 0;
     this.currentNoteName = null;
     this.lastNoteName = null;
     this.stabilityCounter = 0;
-    this.stabilityThreshold = 2; // require 2 frames of same note
+    this.stabilityThreshold = 1; // Reduced from 2 for faster response
     this.rafId = null;
   }
 
@@ -43,23 +45,35 @@ export class Renderer {
   }
 
   render() {
-    // 60fps Dynamic EMA Smoothing Logic (Fast for large movements, smooth for small)
+    // Smooth movement with momentum-based interpolation
     if (this.targetFingertip) {
       if (!this.fingertip) {
+        // Initial position - instant snap
         this.fingertip = { x: this.targetFingertip.x, y: this.targetFingertip.y };
+        this.velocityX = 0;
+        this.velocityY = 0;
       } else {
+        // Smooth interpolation with velocity tracking
         const dx = this.targetFingertip.x - this.fingertip.x;
         const dy = this.targetFingertip.y - this.fingertip.y;
         const dist = Math.sqrt(dx * dx + dy * dy);
         
-        // Dynamic alpha: if distance is large, alpha approaches 0.6 (fast). If small, approaches 0.15 (smooth).
-        const alpha = Math.min(0.6, Math.max(0.15, dist * 5));
+        // Adaptive smoothing: faster for large movements, smoother for small
+        const baseSmoothing = 0.25;
+        const distanceFactor = Math.min(1, dist * 8);
+        const smoothing = baseSmoothing + (distanceFactor * 0.35);
         
-        this.fingertip.x += dx * alpha;
-        this.fingertip.y += dy * alpha;
+        // Apply smoothing with momentum
+        this.velocityX = this.velocityX * 0.7 + dx * smoothing;
+        this.velocityY = this.velocityY * 0.7 + dy * smoothing;
+        
+        this.fingertip.x += this.velocityX;
+        this.fingertip.y += this.velocityY;
       }
     } else {
       this.fingertip = null;
+      this.velocityX = 0;
+      this.velocityY = 0;
     }
 
     // Hit detection using the smoothed fingertip coordinates
@@ -94,7 +108,7 @@ export class Renderer {
         }
       }
     }
-    // else: finger is visible but between zones — keep last note playing, do nothing
+    // else: finger is visible but between zones — keep last note playing
 
     this.noteRing.draw(
       this.appState.currentNote,

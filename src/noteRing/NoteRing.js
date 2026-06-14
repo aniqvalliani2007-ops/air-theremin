@@ -59,26 +59,41 @@ export class NoteRing {
   }
 
   drawZones(activeNote) {
+    const time = Date.now() / 1000;
+    
     this.zones.forEach(zone => {
       const isActive = activeNote?.name === zone.name;
       
+      // Add subtle pulse animation to active zone
+      const pulseScale = isActive ? 1 + Math.sin(time * 6) * 0.08 : 1;
+      const pulseRadius = zone.radius * pulseScale;
+      
       this.ctx.beginPath();
-      this.ctx.arc(zone.x, zone.y, zone.radius, 0, Math.PI * 2);
+      this.ctx.arc(zone.x, zone.y, pulseRadius, 0, Math.PI * 2);
       
       if (isActive) {
-        const grad = this.ctx.createRadialGradient(zone.x - 5, zone.y - 5, 5, zone.x, zone.y, zone.radius);
-        grad.addColorStop(0, 'rgba(255, 215, 0, 0.9)');
-        grad.addColorStop(1, 'rgba(255, 100, 0, 0.6)');
+        const grad = this.ctx.createRadialGradient(
+          zone.x - 5, zone.y - 5, 5, 
+          zone.x, zone.y, pulseRadius
+        );
+        grad.addColorStop(0, 'rgba(255, 215, 0, 0.95)');
+        grad.addColorStop(0.6, 'rgba(255, 150, 0, 0.7)');
+        grad.addColorStop(1, 'rgba(255, 100, 0, 0.5)');
         this.ctx.fillStyle = grad;
+        this.ctx.shadowColor = 'rgba(255, 215, 0, 0.6)';
+        this.ctx.shadowBlur = 15;
       } else {
         this.ctx.fillStyle = 'rgba(30, 30, 60, 0.7)';
+        this.ctx.shadowBlur = 0;
       }
       
       this.ctx.fill();
-      this.ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
-      this.ctx.lineWidth = 2;
+      this.ctx.strokeStyle = isActive ? 'rgba(255, 215, 0, 0.9)' : 'rgba(255, 215, 0, 0.5)';
+      this.ctx.lineWidth = isActive ? 2.5 : 2;
       this.ctx.stroke();
+      this.ctx.shadowBlur = 0;
       
+      // Note label
       this.ctx.font = `${Math.max(12, zone.radius * 0.45)}px "Inter", monospace`;
       this.ctx.fillStyle = isActive ? '#fff' : '#ffd700';
       this.ctx.textAlign = 'center';
@@ -91,17 +106,32 @@ export class NoteRing {
     const x = pos.x * this.canvas.width;
     const y = pos.y * this.canvas.height;
     
+    // Outer glow
+    const glowGrad = this.ctx.createRadialGradient(x, y, 0, x, y, 28);
+    glowGrad.addColorStop(0, 'rgba(255, 100, 100, 0.4)');
+    glowGrad.addColorStop(1, 'rgba(255, 100, 100, 0)');
+    this.ctx.beginPath();
+    this.ctx.arc(x, y, 28, 0, Math.PI * 2);
+    this.ctx.fillStyle = glowGrad;
+    this.ctx.fill();
+    
+    // Main ring
     this.ctx.beginPath();
     this.ctx.arc(x, y, 14, 0, Math.PI * 2);
-    this.ctx.strokeStyle = 'rgba(255, 100, 100, 0.8)';
+    this.ctx.strokeStyle = 'rgba(255, 100, 100, 0.9)';
     this.ctx.lineWidth = 2.5;
     this.ctx.stroke();
     
+    // Inner dot with gradient
+    const dotGrad = this.ctx.createRadialGradient(x - 2, y - 2, 0, x, y, 5);
+    dotGrad.addColorStop(0, 'rgba(255, 150, 150, 1)');
+    dotGrad.addColorStop(1, 'rgba(255, 100, 100, 0.9)');
     this.ctx.beginPath();
     this.ctx.arc(x, y, 5, 0, Math.PI * 2);
-    this.ctx.fillStyle = 'rgba(255, 100, 100, 0.9)';
+    this.ctx.fillStyle = dotGrad;
     this.ctx.fill();
     
+    // Center highlight
     this.ctx.beginPath();
     this.ctx.arc(x, y, 2, 0, Math.PI * 2);
     this.ctx.fillStyle = '#fff';

@@ -7,6 +7,7 @@ export class AudioEngine {
     this.currentFreq = null;
     this.waveform = 'sine';
     this.volume = 0.65;
+    this.isPlaying = false;
   }
 
   async init() {
@@ -25,17 +26,19 @@ export class AudioEngine {
       this.ctx.resume().catch(err => console.warn('Failed to resume audio context:', err));
     }
 
-    // If already playing the same note, just update frequency
-    if (this.currentOsc && this.currentFreq === freq) {
-      this.currentOsc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+    const now = this.ctx.currentTime;
+
+    // If already playing, smoothly glide to new frequency
+    if (this.currentOsc && this.isPlaying) {
+      // Exponential ramp for smooth pitch transition
+      this.currentOsc.frequency.cancelScheduledValues(now);
+      this.currentOsc.frequency.setValueAtTime(this.currentFreq || freq, now);
+      this.currentOsc.frequency.exponentialRampToValueAtTime(freq, now + 0.08);
+      this.currentFreq = freq;
       return true;
     }
 
-    // Stop previous note if different
-    if (this.currentOsc) {
-      this.stopNote();
-    }
-
+    // Start new oscillator if not playing
     try {
       const osc = this.ctx.createOscillator();
       const gain = this.ctx.createGain();
@@ -48,11 +51,15 @@ export class AudioEngine {
       gain.connect(this.masterGain);
 
       osc.start();
-      gain.gain.linearRampToValueAtTime(0.35, this.ctx.currentTime + 0.02);
+      
+      // Smooth fade in to prevent clicks
+      gain.gain.setValueAtTime(0, now);
+      gain.gain.linearRampToValueAtTime(0.35, now + 0.05);
 
       this.currentOsc = osc;
       this.currentGain = gain;
       this.currentFreq = freq;
+      this.isPlaying = true;
       return true;
     } catch (err) {
       console.error('Error playing note:', err);
@@ -61,10 +68,16 @@ export class AudioEngine {
   }
 
   stopNote() {
-    if (!this.currentOsc || !this.currentGain) return;
+    if (!this.currentOsc || !this.currentGain || !this.isPlaying) return;
 
     const now = this.ctx.currentTime;
-    this.currentGain.gain.linearRampToValueAtTime(0, now + 0.08);
+    
+    // Smooth fade out to prevent clicks
+    this.currentGain.gain.cancelScheduledValues(now);
+    this.currentGain.gain.setValueAtTime(this.currentGain.gain.value, now);
+    this.currentGain.gain.linearRampToValueAtTime(0, now + 0.1);
+
+    this.isPlaying = false;
 
     setTimeout(() => {
       try {
@@ -75,7 +88,7 @@ export class AudioEngine {
       this.currentOsc = null;
       this.currentGain = null;
       this.currentFreq = null;
-    }, 100);
+    }, 120);
   }
 
   setWaveform(type) {
@@ -86,7 +99,10 @@ export class AudioEngine {
   setVolume(value) {
     this.volume = value / 100;
     if (this.masterGain) {
-      this.masterGain.gain.linearRampToValueAtTime(this.volume, this.ctx?.currentTime + 0.1);
+      const now = this.ctx?.currentTime || 0;
+      this.masterGain.gain.cancelScheduledValues(now);
+      this.masterGain.gain.setValueAtTime(this.masterGain.gain.value, now);
+      this.masterGain.gain.linearRampToValueAtTime(this.volume, now + 0.1);
     }
   }
 

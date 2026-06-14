@@ -10,12 +10,7 @@ export class NotePlayer {
       return;
     }
     
-    // Compare by name to avoid redundant calls for the same note
-    if (this.currentNote && this.currentNote.name === note.name) {
-      return;
-    }
-    
-    // AudioEngine handles smooth frequency glide internally
+    // Always update frequency - AudioEngine handles smooth gliding
     this.audio.playNote(note.frequency);
     this.currentNote = note;
   }
