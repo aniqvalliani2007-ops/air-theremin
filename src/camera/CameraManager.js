@@ -6,12 +6,13 @@ export class CameraManager {
 
   async init() {
     try {
+      // Try front-facing camera first (better for hand gestures)
       const constraints = {
         video: {
-          facingMode: { exact: "environment" },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          frameRate: { ideal: 60 }
+          facingMode: "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+          frameRate: { ideal: 30, max: 60 }
         }
       };
       
@@ -20,12 +21,22 @@ export class CameraManager {
       await this.video.play();
       return true;
     } catch (err) {
-      console.warn('Rear camera failed, trying default:', err);
-      const constraints = { video: true };
-      this.stream = await navigator.mediaDevices.getUserMedia(constraints);
-      this.video.srcObject = this.stream;
-      await this.video.play();
-      return true;
+      console.warn('Front camera failed, trying default:', err);
+      try {
+        // Fallback to any available camera
+        const constraints = { 
+          video: { 
+            width: { ideal: 1280 },
+            height: { ideal: 720 }
+          } 
+        };
+        this.stream = await navigator.mediaDevices.getUserMedia(constraints);
+        this.video.srcObject = this.stream;
+        await this.video.play();
+        return true;
+      } catch (fallbackErr) {
+        throw new Error('Camera access denied or not available. Please allow camera permissions.');
+      }
     }
   }
 

@@ -20,11 +20,21 @@
   --transition: all 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 
+html {
+  /* Fix for mobile viewport units */
+  height: -webkit-fill-available;
+}
+
 body {
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   overflow: hidden;
   background: var(--bg-dark);
   color: var(--text-primary);
+  min-height: 100vh;
+  min-height: -webkit-fill-available;
+  /* Prevent mobile pull-to-refresh */
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
 /* Video Feed (App UI) */
@@ -103,6 +113,10 @@ body {
   flex-direction: column;
   transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.8s;
   overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  height: 100vh;
+  height: -webkit-fill-available;
 }
 
 .start-screen.hide {
@@ -618,6 +632,27 @@ body {
   50% { opacity: 0.6; box-shadow: 0 0 2px var(--success); }
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromBottom {
+  from { 
+    opacity: 0; 
+    transform: translateY(30px);
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
 /* Responsive */
 @media (max-width: 1024px) {
   .landing-header {
@@ -637,174 +672,84 @@ body {
 @media (max-width: 768px) {
   /* Landing Page */
   .landing-header {
-    padding: 1.5rem 1.5rem;
-    flex-direction: column;
-    gap: 1.5rem;
-    align-items: flex-start;
+    padding: 1.25rem;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
   }
   
   .logo-text {
-    font-size: 1.25rem;
+    font-size: 1.15rem;
   }
   
   .landing-header nav {
-    gap: 1.5rem;
-    width: 100%;
+    gap: 1.25rem;
   }
   
   .landing-header nav a {
-    font-size: 0.85rem;
+    font-size: 0.8rem;
   }
   
   /* Main Content */
+  .start-content {
+    padding: 1rem;
+  }
+  
   .glassy-card {
-    padding: 3rem 2rem;
-    border-radius: 30px;
-    max-width: 95%;
+    padding: 2.5rem 1.75rem;
+    border-radius: 25px;
+    max-width: 100%;
+    width: 100%;
+  }
+  
+  .glassy-card .logo svg {
+    width: 60px;
+    height: 60px;
   }
   
   .title {
-    font-size: 2.5rem;
+    font-size: 2.25rem;
     letter-spacing: -1.5px;
+    line-height: 1.15;
   }
   
   .subtitle {
-    font-size: 1rem;
+    font-size: 0.95rem;
     margin-bottom: 2rem;
+    line-height: 1.5;
   }
   
   .start-btn {
     padding: 1rem 2rem;
-    font-size: 1rem;
+    font-size: 0.95rem;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .start-btn:active {
+    transform: scale(0.96) !important;
   }
   
   /* App UI */
   .camera-wrapper {
-    width: 180px;
-    height: 120px;
-    right: 15px;
-    top: 15px;
-    border-radius: 15px;
-  }
-  
-  .back-btn {
-    top: 15px;
-    left: 15px;
-    padding: 0.65rem 1.25rem;
-    font-size: 0.85rem;
-  }
-  
-  .control-bar {
-    width: 95%;
-    padding: 1rem 1.5rem;
-    bottom: 15px;
-    gap: 1rem;
-    border-radius: 20px;
-  }
-  
-  .control-value {
-    font-size: 1.25rem;
-  }
-  
-  .control-label {
-    font-size: 0.6rem;
-  }
-  
-  /* Modal */
-  .modal-container {
-    max-width: 90%;
-  }
-  
-  .modal-header {
-    padding: 1.25rem;
-  }
-  
-  .modal-body {
-    padding: 1.25rem;
-  }
-  
-  .setting {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.5rem;
-  }
-  
-  .setting label {
-    width: 100%;
-  }
-  
-  .setting input[type="range"],
-  .setting select {
-    width: 100%;
-  }
-  
-  .setting-value {
-    text-align: left;
-  }
-  
-  /* Toast */
-  .toast {
-    bottom: 100px;
-    font-size: 0.85rem;
-    padding: 0.65rem 1.25rem;
-  }
-  
-  /* Features Grid */
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: 1rem;
-  }
-  
-  .text-content {
-    font-size: 1rem;
-  }
-}
-
-@media (max-width: 480px) {
-  /* Extra Small Phones */
-  .landing-header {
-    padding: 1rem;
-  }
-  
-  .logo-text {
-    font-size: 1.1rem;
-  }
-  
-  .glassy-card {
-    padding: 2rem 1.5rem;
-    border-radius: 25px;
-  }
-  
-  .title {
-    font-size: 2rem;
-    letter-spacing: -1px;
-  }
-  
-  .subtitle {
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .start-btn {
-    padding: 0.9rem 1.75rem;
-    font-size: 0.95rem;
-    gap: 0.5rem;
-  }
-  
-  .camera-wrapper {
-    width: 140px;
-    height: 90px;
+    width: 160px;
+    height: 105px;
     right: 10px;
     top: 10px;
     border-radius: 12px;
   }
   
+  .camera-status {
+    font-size: 0.55rem;
+    padding: 3px 6px;
+  }
+  
   .back-btn {
     top: 10px;
     left: 10px;
-    padding: 0.6rem 1rem;
+    padding: 0.6rem 1.15rem;
     font-size: 0.8rem;
-    gap: 0.35rem;
   }
   
   .back-btn svg {
@@ -813,24 +758,28 @@ body {
   }
   
   .control-bar {
-    padding: 0.85rem 1rem;
+    width: calc(100% - 20px);
+    padding: 0.85rem 1.25rem;
     bottom: 10px;
+    gap: 0.75rem;
+    border-radius: 18px;
     flex-wrap: wrap;
-    justify-content: center;
   }
   
   .control-group {
-    flex-wrap: wrap;
-    justify-content: center;
     gap: 1rem;
   }
   
   .control-value {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+  }
+  
+  .control-label {
+    font-size: 0.58rem;
   }
   
   .divider-vertical {
-    display: none;
+    height: 35px;
   }
   
   .icon-btn {
@@ -843,32 +792,44 @@ body {
     height: 18px;
   }
   
-  .status {
-    padding: 0.45rem 0.85rem;
-  }
-  
-  .status-text {
-    font-size: 0.75rem;
-  }
-  
+  /* Modal */
   .modal-container {
-    max-width: 95%;
-    border-radius: 20px;
+    max-width: 90%;
+    width: 90%;
+  }
+  
+  .modal-header {
+    padding: 1.15rem;
   }
   
   .modal-header h3 {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
+  }
+  
+  .modal-body {
+    padding: 1.15rem;
+  }
+  
+  .setting {
+    margin-bottom: 1.25rem;
   }
   
   .setting label {
     font-size: 0.8rem;
   }
   
+  /* Toast */
   .toast {
-    bottom: 80px;
+    bottom: 90px;
     font-size: 0.8rem;
-    padding: 0.6rem 1rem;
-    max-width: 85%;
+    padding: 0.65rem 1.15rem;
+    max-width: calc(100% - 40px);
+  }
+  
+  /* Features Grid */
+  .features-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
   }
   
   .text-content {
@@ -877,111 +838,346 @@ body {
   }
   
   .feature-box {
-    padding: 1.25rem;
+    padding: 1.35rem;
+  }
+  
+  .landing-footer {
+    padding: 1.5rem;
+    font-size: 0.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Small Phones */
+  .landing-header {
+    padding: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .logo-text {
+    font-size: 1.05rem;
+  }
+  
+  .landing-header nav {
+    gap: 1rem;
+  }
+  
+  .landing-header nav a {
+    font-size: 0.75rem;
+    padding: 0.5rem 0;
+  }
+  
+  .glassy-card {
+    padding: 2rem 1.35rem;
+    border-radius: 22px;
+    margin: 0.5rem;
+  }
+  
+  .glassy-card .logo svg {
+    width: 50px;
+    height: 50px;
+  }
+  
+  .title {
+    font-size: 1.85rem;
+    letter-spacing: -1px;
+    margin-bottom: 0.75rem;
+  }
+  
+  .subtitle {
+    font-size: 0.85rem;
+    margin-bottom: 1.75rem;
+  }
+  
+  .start-btn {
+    padding: 0.85rem 1.65rem;
+    font-size: 0.9rem;
+    gap: 0.5rem;
+  }
+  
+  .start-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .camera-wrapper {
+    width: 130px;
+    height: 85px;
+    right: 8px;
+    top: 8px;
+    border-radius: 10px;
+  }
+  
+  .back-btn {
+    top: 8px;
+    left: 8px;
+    padding: 0.55rem 0.95rem;
+    font-size: 0.75rem;
+    gap: 0.35rem;
+  }
+  
+  .back-btn svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .control-bar {
+    padding: 0.75rem 1rem;
+    bottom: 8px;
+    width: calc(100% - 16px);
+    gap: 0.65rem;
+  }
+  
+  .control-group {
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .control-item {
+    min-width: 70px;
+  }
+  
+  .control-value {
+    font-size: 1rem;
+  }
+  
+  .control-label {
+    font-size: 0.55rem;
+  }
+  
+  .divider-vertical {
+    display: none;
+  }
+  
+  .status {
+    padding: 0.4rem 0.75rem;
+    order: -1;
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .status-text {
+    font-size: 0.7rem;
+  }
+  
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .icon-btn svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .modal-container {
+    max-width: 95%;
+    border-radius: 18px;
+  }
+  
+  .modal-header h3 {
+    font-size: 1.05rem;
+  }
+  
+  .close-btn {
+    font-size: 1.35rem;
+  }
+  
+  .setting {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  
+  .setting label {
+    width: 100%;
+    font-size: 0.75rem;
+  }
+  
+  .setting input[type="range"],
+  .setting select {
+    width: 100%;
+  }
+  
+  .setting-value {
+    text-align: left;
+    font-size: 0.75rem;
+  }
+  
+  .toast {
+    bottom: 75px;
+    font-size: 0.75rem;
+    padding: 0.55rem 0.95rem;
+    max-width: calc(100% - 30px);
+  }
+  
+  .text-content {
+    font-size: 0.9rem;
+    line-height: 1.65;
+  }
+  
+  .text-content p {
+    margin-bottom: 1.25rem;
+  }
+  
+  .feature-box {
+    padding: 1.15rem;
   }
   
   .feature-box h3 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
   }
   
   .feature-box p {
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+  }
+  
+  .landing-footer {
+    padding: 1.25rem;
+    font-size: 0.75rem;
   }
 }
 
 @media (max-width: 380px) {
   /* Very Small Phones */
   .title {
-    font-size: 1.75rem;
+    font-size: 1.65rem;
+  }
+  
+  .subtitle {
+    font-size: 0.8rem;
   }
   
   .glassy-card {
-    padding: 1.75rem 1.25rem;
+    padding: 1.75rem 1.15rem;
+  }
+  
+  .start-btn {
+    padding: 0.8rem 1.5rem;
+    font-size: 0.85rem;
   }
   
   .control-bar {
-    padding: 0.75rem 0.85rem;
+    padding: 0.65rem 0.85rem;
   }
   
   .control-item {
     gap: 0.15rem;
+    min-width: 65px;
   }
   
   .control-label {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
   }
   
   .control-value {
-    font-size: 1rem;
+    font-size: 0.95rem;
+  }
+  
+  .camera-wrapper {
+    width: 110px;
+    height: 72px;
   }
 }
 
 @media (orientation: landscape) and (max-height: 500px) {
   /* Mobile Landscape Mode */
   .camera-wrapper {
-    width: 120px;
-    height: 80px;
-    right: 10px;
-    top: 10px;
+    width: 100px;
+    height: 65px;
+    right: 8px;
+    top: 8px;
   }
   
   .back-btn {
-    top: 10px;
-    left: 10px;
-    padding: 0.5rem 0.9rem;
-    font-size: 0.75rem;
+    top: 8px;
+    left: 8px;
+    padding: 0.45rem 0.85rem;
+    font-size: 0.7rem;
   }
   
   .control-bar {
-    bottom: 10px;
-    padding: 0.65rem 1.25rem;
-    gap: 1rem;
+    bottom: 8px;
+    padding: 0.55rem 1.15rem;
+    gap: 0.85rem;
   }
   
   .control-value {
-    font-size: 1rem;
+    font-size: 0.95rem;
   }
   
   .control-label {
-    font-size: 0.55rem;
+    font-size: 0.5rem;
+  }
+  
+  .control-item {
+    gap: 0.15rem;
   }
   
   .toast {
-    bottom: 70px;
+    bottom: 65px;
+    font-size: 0.75rem;
   }
   
   .glassy-card {
-    padding: 2rem 2.5rem;
-    margin: 1rem;
+    padding: 1.75rem 2rem;
+    margin: 0.75rem;
+    max-height: calc(100vh - 100px);
+    overflow-y: auto;
   }
   
   .title {
-    font-size: 2rem;
+    font-size: 1.75rem;
   }
   
   .subtitle {
-    font-size: 0.9rem;
-    margin-bottom: 1.5rem;
+    font-size: 0.85rem;
+    margin-bottom: 1.25rem;
   }
   
   .landing-header {
     flex-direction: row;
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1.25rem;
+  }
+  
+  .landing-footer {
+    padding: 1rem;
   }
 }
 
 @media (hover: none) and (pointer: coarse) {
-  /* Touch Devices - Larger tap targets */
+  /* Touch Devices - Larger tap targets & better touch feedback */
   .start-btn,
   .back-btn,
   .icon-btn,
   .landing-header nav a {
     min-height: 44px;
-    min-width: 44px;
+  }
+  
+  .start-btn:active {
+    transform: scale(0.97);
+  }
+  
+  .back-btn:active,
+  .icon-btn:active {
+    transform: scale(0.95);
   }
   
   .setting input[type="range"]::-webkit-slider-thumb {
-    width: 20px;
-    height: 20px;
+    width: 22px;
+    height: 22px;
+  }
+  
+  /* Prevent text selection on touch */
+  .start-btn,
+  .back-btn,
+  .control-bar,
+  .icon-btn,
+  .landing-header nav a {
+    -webkit-user-select: none;
+    user-select: none;
   }
 }
