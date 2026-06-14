@@ -1,4 +1,5 @@
-import { Hands } from '@mediapipe/hands';
+// Hands is loaded globally via CDN script in index.html
+const Hands = window.Hands;
 
 export class HandTracker {
   constructor(videoElement, onFingertipUpdate, onHandStatus) {

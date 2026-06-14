@@ -11,10 +11,9 @@ export default defineConfig({
     minify: 'esbuild',
     sourcemap: true,
     rollupOptions: {
+      external: ['@mediapipe/hands'],
       output: {
-        manualChunks: {
-          'mediapipe': ['@mediapipe/hands']
-        }
+        manualChunks: undefined
       }
     }
   }
