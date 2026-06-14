@@ -1,5 +1,6 @@
 import { defineConfig } from 'vite'
 
+// Fixed MediaPipe bundling issue for Vercel deployment
 export default defineConfig({
   server: {
     host: true,       // Allow network access
